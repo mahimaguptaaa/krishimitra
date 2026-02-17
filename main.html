@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>कृषिMitra - मुख्य पृष्ठ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #56ab2f;
+            --light-green: #a8e063;
+            --bg-light: #f8fff8;
+            --text-dark: #333;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            --bg-light: #1a2f1a;
+            --text-dark: #e0e0e0;
+            --shadow: rgba(255, 255, 255, 0.1);
+            background: #1a2f1a;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--light-green) 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Realistic Photo Background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+            background: linear-gradient(to bottom, 
+                rgba(135, 206, 235, 0.3) 0%, 
+                rgba(144, 238, 144, 0.3) 50%, 
+                rgba(34, 139, 34, 0.3) 100%);
+        }
+
+        /* Realistic background imagery using CSS */
+        .background-scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Sky */
+                linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 30%, #90EE90 70%, #228B22 100%);
+        }
+
+        /* Crop Fields - Realistic texture */
+        .crop-field-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 15%;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    #558B2F 0px,
+                    #689F38 2px,
+                    #558B2F 4px,
+                    #7CB342 6px,
+                    #558B2F 8px
+                ),
+                linear-gradient(to bottom, #7CB342 0%, #558B2F 100%);
+            opacity: 1.5;
+        }
+
+        .field-rows {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 30%;
+        }
+
+        .field-row {
+            position: absolute;
+            width: 100%;
+            height: 15px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 10px,
+                rgba(76, 175, 80, 0.4) 10px,
+                rgba(76, 175, 80, 0.4) 12px,
+                transparent 12px,
+                transparent 30px
+            );
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: bottom;
+        }
+
+        .field-row:nth-child(1) { bottom: 25%; opacity: 1.5; }
+        .field-row:nth-child(2) { bottom: 20%; opacity: 1.5; }
+        .field-row:nth-child(3) { bottom: 15%; opacity: 1.5; }
+        .field-row:nth-child(4) { bottom: 10%; opacity: 1.5; }
+        .field-row:nth-child(5) { bottom: 5%; opacity: 1.5; }
+        .field-row:nth-child(6) { bottom: 0%; opacity: 1.5; }
+
+        /* Distant Hills */
+        .hills {
+            position: absolute;
+            bottom: 30%;
+            width: 100%;
+            height: 25%;
+            background: 
+                radial-gradient(ellipse 800px 200px at 20% 100%, rgba(34, 139, 34, 0.3) 0%, transparent 80%),
+                radial-gradient(ellipse 600px 180px at 60% 100%, rgba(46, 125, 50, 0.3) 0%, transparent 60%),
+                radial-gradient(ellipse 700px 190px at 85% 100%, rgba(27, 94, 32, 0.3) 0%, transparent 60%);
+        }
+
+        /* Village House - More realistic */
+        .village-house-realistic {
+            position: absolute;
+            bottom: 28%;
+            right: 10%;
+            width: 180px;
+            height: 120px;
+            opacity: 1.5;
+        }
+
+        .house-structure {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            border: 2px solid #654321;
+            box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .house-roof-realistic {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-bottom: 50px solid #8B4513;
+            filter: drop-shadow(0 -2px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .house-door-realistic {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 45px;
+            background: linear-gradient(to right, #654321 0%, #4a2511 100%);
+            border: 2px solid #3d1f0f;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .house-window-realistic {
+            position: absolute;
+            top: 20px;
+            width: 22px;
+            height: 22px;
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            border: 2px solid #654321;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .house-window-realistic.left { left: 15px; }
+        .house-window-realistic.right { right: 15px; }
+
+        /* Realistic Farmer Images */
+        .farmer-realistic {
+            position: absolute;
+            bottom: 12%;
+            width: 200px;
+            height: 300px;
+            opacity: 1.5;
+            filter: contrast(1.1) saturate(0.9);
+        }
+
+        .farmer-realistic.farmer1 { left: 8%; }
+        .farmer-realistic.farmer2 { left: 30%; }
+        .farmer-realistic.farmer3 { right: 30%; }
+        .farmer-realistic.farmer4 { right: 8%; }
+
+        /* Farmer Body Structure - Realistic proportions */
+        .farmer-silhouette {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .farmer-head-realistic {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #D2691E, #8B4513);
+            border-radius: 50% 50% 45% 45%;
+            box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .farmer-headwear {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75px;
+            height: 25px;
+            background: linear-gradient(to bottom, #CD853F, #8B4513);
+            border-radius: 50% 50% 0 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .farmer-headwear::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85px;
+            height: 8px;
+            background: #A0522D;
+            border-radius: 50%;
+        }
+
+        .farmer-torso {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 110px;
+            background: linear-gradient(to bottom, #4A7C59, #2d5a3d);
+            border-radius: 8px;
+            box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .farmer-torso.female {
+            background: linear-gradient(to bottom, #E91E63, #c2185b);
+            width: 75px;
+            border-radius: 12px 12px 20px 20px;
+        }
+
+        .farmer-arm-realistic {
+            position: absolute;
+            top: 70px;
+            width: 18px;
+            height: 95px;
+            background: linear-gradient(to bottom, #D2691E, #8B4513);
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            transform-origin: top center;
+        }
+
+        .farmer-arm-realistic.left {
+            left: 35px;
+            animation: realistic-farming 2.5s ease-in-out infinite;
+        }
+
+        .farmer-arm-realistic.right {
+            right: 35px;
+            animation: realistic-farming 2.5s ease-in-out infinite 1.25s;
+        }
+
+        .farming-tool {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 60px;
+            background: linear-gradient(to bottom, #654321, #3d2817);
+            border-radius: 3px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .farming-tool::before {
+            content: '';
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 10px;
+            background: linear-gradient(to right, #708090, #2F4F4F);
+            border-radius: 2px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .farming-tool::after {
+            content: '';
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: #A9A9A9;
+            border-radius: 1px;
+        }
+
+        .farmer-legs-realistic {
+            position: absolute;
+            top: 170px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 90px;
+        }
+
+        .farmer-leg-realistic {
+            position: absolute;
+            width: 24px;
+            height: 90px;
+            background: linear-gradient(to bottom, #5D4037, #3E2723);
+            border-radius: 5px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .farmer-leg-realistic.left { left: 12px; }
+        .farmer-leg-realistic.right { right: 12px; }
+
+        .farmer-boot {
+            position: absolute;
+            bottom: -5px;
+            width: 100%;
+            height: 18px;
+            background: #2c1810;
+            border-radius: 3px 3px 8px 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes realistic-farming {
+            0%, 100% {
+                transform: rotate(-15deg);
+            }
+            50% {
+                transform: rotate(-55deg);
+            }
+        }
+
+        /* Clouds - Realistic */
+        .cloud-realistic {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 100px;
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.5);
+            animation: drift-cloud 80s linear infinite;
+        }
+
+        .cloud-realistic::before,
+        .cloud-realistic::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 100px;
+        }
+
+        .cloud-realistic.c1 {
+            width: 120px;
+            height: 50px;
+            top: 8%;
+            left: -150px;
+        }
+
+        .cloud-realistic.c1::before {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 15px;
+        }
+
+        .cloud-realistic.c1::after {
+            width: 70px;
+            height: 50px;
+            top: -25px;
+            right: 15px;
+        }
+
+        .cloud-realistic.c2 {
+            width: 140px;
+            height: 60px;
+            top: 15%;
+            left: -200px;
+            animation-delay: 20s;
+        }
+
+        .cloud-realistic.c2::before {
+            width: 70px;
+            height: 70px;
+            top: -35px;
+            left: 20px;
+        }
+
+        .cloud-realistic.c2::after {
+            width: 80px;
+            height: 60px;
+            top: -30px;
+            right: 20px;
+        }
+
+        .cloud-realistic.c3 {
+            width: 100px;
+            height: 45px;
+            top: 22%;
+            left: -120px;
+            animation-delay: 40s;
+        }
+
+        .cloud-realistic.c3::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 12px;
+        }
+
+        .cloud-realistic.c3::after {
+            width: 60px;
+            height: 45px;
+            top: -22px;
+            right: 12px;
+        }
+
+        @keyframes drift-cloud {
+            from { transform: translateX(0); }
+            to { transform: translateX(calc(100vw + 250px)); }
+        }
+
+        /* Trees in background */
+        .tree-realistic {
+            position: absolute;
+            bottom: 30%;
+            opacity: 0.4;
+        }
+
+        .tree-trunk {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 50px;
+            background: linear-gradient(to right, #654321, #8B4513);
+            border-radius: 3px;
+        }
+
+        .tree-foliage {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #228B22, #006400);
+            border-radius: 50%;
+            box-shadow: 
+                inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .tree-foliage::before {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: 10px;
+            width: 45px;
+            height: 45px;
+            background: radial-gradient(circle, #2E7D32, #1B5E20);
+            border-radius: 50%;
+        }
+
+        .tree-foliage::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #388E3C, #2E7D32);
+            border-radius: 50%;
+        }
+
+        .tree1 { left: 15%; }
+        .tree2 { right: 18%; }
+        .tree3 { left: 70%; }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .main-content::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        body.dark-mode .main-content::before {
+            background: rgba(26, 47, 26, 0.85);
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px var(--shadow);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        body.dark-mode .welcome-section {
+            background: #2d4a2d;
+            color: var(--text-dark);
+        }
+
+        .welcome-section h1 {
+            color: var(--primary-green);
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        body.dark-mode .welcome-section h1 {
+            color: var(--light-green);
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        body.dark-mode .welcome-section p {
+            color: #b0b0b0;
+        }
+
+        /* Input Panel */
+        .input-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        body.dark-mode .input-panel {
+            background: #2d4a2d;
+        }
+
+        .input-label {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .input-area {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: white;
+            color: var(--text-dark);
+        }
+
+        body.dark-mode .input-area {
+            background: #1a2f1a;
+            border-color: #4a6a4a;
+            color: var(--text-dark);
+        }
+
+        .input-area:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(86, 171, 47, 0.1);
+        }
+
+        .input-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--light-green) 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(86, 171, 47, 0.3);
+        }
+
+        .audio-btn, .image-btn {
+            background: #f0f0f0;
+            color: var(--text-dark);
+        }
+
+        body.dark-mode .audio-btn,
+        body.dark-mode .image-btn {
+            background: #3a5a3a;
+            color: var(--text-dark);
+        }
+
+        .audio-btn:hover, .image-btn:hover {
+            background: #e0e0e0;
+        }
+
+        body.dark-mode .audio-btn:hover,
+        body.dark-mode .image-btn:hover {
+            background: #4a6a4a;
+        }
+
+        /* Settings Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .modal-content {
+            background: #2d4a2d;
+            color: var(--text-dark);
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-green);
+        }
+
+        body.dark-mode .modal-header {
+            color: var(--light-green);
+        }
+
+        .setting-item {
+            margin-bottom: 20px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .setting-item select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            color: var(--text-dark);
+        }
+
+        body.dark-mode .setting-item select {
+            background: #1a2f1a;
+            border-color: #4a6a4a;
+            color: var(--text-dark);
+        }
+
+        .close-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .close-btn:hover {
+            background: #4a9427;
+        }
+
+        /* Response Area - Special Focus */
+        .response-area {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(86, 171, 47, 0.4), 0 0 0 3px #56ab2f;
+            margin-top: 40px;
+            display: none;
+            position: relative;
+            border: 4px solid #56ab2f;
+            animation: slideUpFade 0.5s ease-out;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body.dark-mode .response-area {
+            background: #2d4a2d;
+            color: var(--text-dark);
+            box-shadow: 0 15px 50px rgba(168, 224, 99, 0.3), 0 0 0 3px #a8e063;
+            border-color: #a8e063;
+        }
+
+        .response-area.active {
+            display: block;
+        }
+
+        .response-area::before {
+            content: '✨';
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            font-size: 30px;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        .response-header {
+            font-size: 26px;
+            font-weight: 700;
+            color: #56ab2f;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #a8e063;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .response-header::before {
+            content: '💡';
+            font-size: 30px;
+        }
+
+        body.dark-mode .response-header {
+            color: var(--light-green);
+            border-bottom-color: #4a6a4a;
+        }
+
+        .response-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--text-dark);
+            background: #f8fff8;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #56ab2f;
+            min-height: 100px;
+        }
+
+        body.dark-mode .response-text {
+            background: #1a2f1a;
+            border-left-color: #a8e063;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 12px 15px;
+            }
+
+            .navbar-brand {
+                font-size: 22px;
+            }
+
+            .navbar-menu {
+                gap: 10px;
+                font-size: 14px;
+            }
+
+            .nav-item {
+                padding: 6px 10px;
+            }
+
+            .welcome-section h1 {
+                font-size: 24px;
+            }
+
+            .input-options {
+                flex-direction: column;
+            }
+
+            .farmer-realistic {
+                width: 140px;
+                height: 220px;
+                opacity: 0.45;
+            }
+
+            .farmer-head-realistic {
+                width: 40px;
+                height: 45px;
+            }
+
+            .farmer-headwear {
+                width: 55px;
+                height: 20px;
+            }
+
+            .farmer-torso {
+                width: 60px;
+                height: 85px;
+            }
+
+            .farmer-torso.female {
+                width: 55px;
+            }
+
+            .farmer-arm-realistic {
+                width: 14px;
+                height: 70px;
+            }
+
+            .farmer-arm-realistic.left {
+                left: 25px;
+            }
+
+            .farmer-arm-realistic.right {
+                right: 25px;
+            }
+
+            .farming-tool {
+                height: 45px;
+                bottom: -40px;
+            }
+
+            .farming-tool::before {
+                width: 35px;
+                height: 8px;
+            }
+
+            .farmer-legs-realistic {
+                height: 70px;
+            }
+
+            .farmer-leg-realistic {
+                width: 20px;
+                height: 70px;
+            }
+
+            .village-house-realistic {
+                width: 130px;
+                height: 90px;
+                opacity: 0.45;
+            }
+
+            .house-structure {
+                height: 60px;
+            }
+
+            .house-roof-realistic {
+                border-left: 70px solid transparent;
+                border-right: 70px solid transparent;
+                border-bottom: 35px solid #8B4513;
+            }
+
+            .tree-realistic {
+                transform: scale(0.7);
+            }
+
+            .response-header {
+                font-size: 22px;
+            }
+
+            .response-text {
+                font-size: 16px;
+                padding: 20px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span>👨‍🌾</span>
+            <span>कृषिMitra</span>
+        </div>
+        <div class="navbar-menu">
+            <a href="#" class="nav-item">🏠 होम</a>
+            <div class="nav-item" style="cursor: default;">
+                📞 हेल्पलाइन: 1800-180-1551
+            </div>
+            <a href="#" class="nav-item" id="settingsBtn">⚙️ सेटिंग्स</a>
+            <a href="#" class="nav-item" id="logoutBtn">🚪 लॉगआउट</a>
+        </div>
+    </nav>
+
+    <!-- Realistic Background Scene -->
+    <div class="background-animation">
+        <!-- Sky and Hills Background -->
+        <div class="background-scene"></div>
+        <div class="hills"></div>
+        
+        <!-- Distant Trees -->
+        <div class="tree-realistic tree1">
+            <div class="tree-trunk"></div>
+            <div class="tree-foliage"></div>
+        </div>
+        <div class="tree-realistic tree2">
+            <div class="tree-trunk"></div>
+            <div class="tree-foliage"></div>
+        </div>
+        <div class="tree-realistic tree3">
+            <div class="tree-trunk"></div>
+            <div class="tree-foliage"></div>
+        </div>
+        
+        <!-- Realistic Clouds -->
+        <div class="cloud-realistic c1"></div>
+        <div class="cloud-realistic c2"></div>
+        <div class="cloud-realistic c3"></div>
+        
+        <!-- Village House -->
+        <div class="village-house-realistic">
+            <div class="house-roof-realistic"></div>
+            <div class="house-structure">
+                <div class="house-window-realistic left"></div>
+                <div class="house-window-realistic right"></div>
+                <div class="house-door-realistic"></div>
+            </div>
+        </div>
+        
+        <!-- Crop Field Rows with Perspective -->
+        <div class="field-rows">
+            <div class="field-row"></div>
+            <div class="field-row"></div>
+            <div class="field-row"></div>
+            <div class="field-row"></div>
+            <div class="field-row"></div>
+            <div class="field-row"></div>
+        </div>
+        
+        <!-- Green Crop Fields -->
+        <div class="crop-field-layer"></div>
+        
+        <!-- Realistic Farmer 1 - Male -->
+        <div class="farmer-realistic farmer1">
+            <div class="farmer-silhouette">
+                <div class="farmer-head-realistic">
+                    <div class="farmer-headwear"></div>
+                </div>
+                <div class="farmer-torso">
+                    <div class="farmer-arm-realistic left">
+                        <div class="farming-tool"></div>
+                    </div>
+                    <div class="farmer-arm-realistic right">
+                        <div class="farming-tool"></div>
+                    </div>
+                </div>
+                <div class="farmer-legs-realistic">
+                    <div class="farmer-leg-realistic left">
+                        <div class="farmer-boot"></div>
+                    </div>
+                    <div class="farmer-leg-realistic right">
+                        <div class="farmer-boot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Realistic Farmer 2 - Female -->
+        <div class="farmer-realistic farmer2">
+            <div class="farmer-silhouette">
+                <div class="farmer-head-realistic">
+                    <div class="farmer-headwear"></div>
+                </div>
+                <div class="farmer-torso female">
+                    <div class="farmer-arm-realistic left">
+                        <div class="farming-tool"></div>
+                    </div>
+                    <div class="farmer-arm-realistic right">
+                        <div class="farming-tool"></div>
+                    </div>
+                </div>
+                <div class="farmer-legs-realistic">
+                    <div class="farmer-leg-realistic left">
+                        <div class="farmer-boot"></div>
+                    </div>
+                    <div class="farmer-leg-realistic right">
+                        <div class="farmer-boot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Realistic Farmer 3 - Male -->
+        <div class="farmer-realistic farmer3">
+            <div class="farmer-silhouette">
+                <div class="farmer-head-realistic">
+                    <div class="farmer-headwear"></div>
+                </div>
+                <div class="farmer-torso">
+                    <div class="farmer-arm-realistic left">
+                        <div class="farming-tool"></div>
+                    </div>
+                    <div class="farmer-arm-realistic right">
+                        <div class="farming-tool"></div>
+                    </div>
+                </div>
+                <div class="farmer-legs-realistic">
+                    <div class="farmer-leg-realistic left">
+                        <div class="farmer-boot"></div>
+                    </div>
+                    <div class="farmer-leg-realistic right">
+                        <div class="farmer-boot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Realistic Farmer 4 - Female -->
+        <div class="farmer-realistic farmer4">
+            <div class="farmer-silhouette">
+                <div class="farmer-head-realistic">
+                    <div class="farmer-headwear"></div>
+                </div>
+                <div class="farmer-torso female">
+                    <div class="farmer-arm-realistic left">
+                        <div class="farming-tool"></div>
+                    </div>
+                    <div class="farmer-arm-realistic right">
+                        <div class="farming-tool"></div>
+                    </div>
+                </div>
+                <div class="farmer-legs-realistic">
+                    <div class="farmer-leg-realistic left">
+                        <div class="farmer-boot"></div>
+                    </div>
+                    <div class="farmer-leg-realistic right">
+                        <div class="farmer-boot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="welcome-section">
+            <h1>स्वागत है कृषिMitra में!</h1>
+            <p>अपने खेती से जुड़े सवाल पूछें, हम आपकी मदद के लिए यहाँ हैं</p>
+        </div>
+
+        <div class="input-panel">
+            <label class="input-label">अपना प्रश्न यहाँ दर्ज करें:</label>
+            <textarea 
+                class="input-area" 
+                id="questionInput" 
+                placeholder="उदाहरण: गेहूं की खेती के लिए सबसे अच्छा समय क्या है?"></textarea>
+            
+            <div class="input-options">
+                <button class="input-btn submit-btn" id="submitBtn">
+                    <span>📤</span>
+                    <span id="submitText">पूछें</span>
+                </button>
+                <button class="input-btn audio-btn" id="audioBtn">
+                    🎤 <span id="audioText">आवाज़</span>
+                </button>
+                
+            </div>
+            
+        </div>
+
+        <div class="response-area" id="responseArea">
+            <div class="response-header">जवाब:</div>
+            <div class="response-text" id="responseText">
+                यहाँ आपका जवाब दिखाया जाएगा...
+            </div>
+            <button id="stopBtn">⏹ जवाब रोकें</button>
+            <button id="newQuestionBtn">➕ नया सवाल पूछें</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2 class="modal-header">सेटिंग्स</h2>
+            
+            <div class="setting-item">
+                <label for="languageSelect">भाषा चुनें:</label>
+                <select id="languageSelect">
+                    <option value="hi">हिंदी</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            
+            <div class="setting-item">
+                <label for="themeSelect">थीम चुनें:</label>
+                <select id="themeSelect">
+                    <option value="light">लाइट मोड</option>
+                    <option value="dark">डार्क मोड</option>
+                </select>
+            </div>
+            
+            <button class="close-btn" id="closeModalBtn">बंद करें</button>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'index.html';
+        }
+
+        // Language translations
+        const translations = {
+            hi: {
+                home: "🏠 होम",
+                helpline: "📞 हेल्पलाइन: 1800-180-1551",
+                settings: "⚙️ सेटिंग्स",
+                logout: "🚪 लॉगआउट",
+                welcome: "स्वागत है कृषिMitra में!",
+                subtitle: "अपने खेती से जुड़े सवाल पूछें, हम आपकी मदद के लिए यहाँ हैं",
+                inputLabel: "अपना प्रश्न यहाँ दर्ज करें:",
+                placeholder: "उदाहरण: गेहूं की खेती के लिए सबसे अच्छा समय क्या है?",
+                submit: "पूछें",
+                audio: "आवाज़",
+                image: "तस्वीर",
+                settingsTitle: "सेटिंग्स",
+                languageLabel: "भाषा चुनें:",
+                themeLabel: "थीम चुनें:",
+                close: "बंद करें",
+                response: "जवाब:",
+                responseDefault: "यहाँ आपका जवाब दिखाया जाएगा..."
+            },
+            en: {
+                home: "🏠 Home",
+                helpline: "📞 Helpline: 1800-180-1551",
+                settings: "⚙️ Settings",
+                logout: "🚪 Logout",
+                welcome: "Welcome to कृषिMitra!",
+                subtitle: "Ask your farming questions, we're here to help",
+                inputLabel: "Enter your question here:",
+                placeholder: "Example: What is the best time to cultivate wheat?",
+                submit: "Ask",
+                audio: "Voice",
+                image: "Image",
+                settingsTitle: "Settings",
+                languageLabel: "Select Language:",
+                themeLabel: "Select Theme:",
+                close: "Close",
+                response: "Answer:",
+                responseDefault: "Your answer will be displayed here..."
+            }
+        };
+
+        // Settings Modal
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        settingsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            settingsModal.classList.add('active');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+        });
+
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.remove('active');
+            }
+        });
+
+        // Language Change
+        const languageSelect = document.getElementById('languageSelect');
+        languageSelect.addEventListener('change', (e) => {
+            const lang = e.target.value;
+            updateLanguage(lang);
+            localStorage.setItem('language', lang);
+        });
+
+        function updateLanguage(lang) {
+            const t = translations[lang];
+            document.querySelector('.navbar-menu').innerHTML = `
+                <a href="#" class="nav-item">${t.home}</a>
+                <div class="nav-item" style="cursor: default;">${t.helpline}</div>
+                <a href="#" class="nav-item" id="settingsBtn">${t.settings}</a>
+                <a href="#" class="nav-item" id="logoutBtn">${t.logout}</a>
+            `;
+            document.querySelector('.welcome-section h1').textContent = t.welcome;
+            document.querySelector('.welcome-section p').textContent = t.subtitle;
+            document.querySelector('.input-label').textContent = t.inputLabel;
+            document.getElementById('questionInput').placeholder = t.placeholder;
+            document.getElementById('submitText').textContent = t.submit;
+            document.getElementById('audioText').textContent = t.audio;
+            document.querySelector('.image-btn').innerHTML = `📷 ${t.image}`;
+            document.querySelector('.modal-header').textContent = t.settingsTitle;
+            document.querySelector('.setting-item label[for="languageSelect"]').textContent = t.languageLabel;
+            document.querySelector('.setting-item label[for="themeSelect"]').textContent = t.themeLabel;
+            document.getElementById('closeModalBtn').textContent = t.close;
+            document.querySelector('.response-header').textContent = t.response;
+            
+            // Re-attach event listeners
+            document.getElementById('settingsBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                settingsModal.classList.add('active');
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        }
+
+        // Theme Change
+        const themeSelect = document.getElementById('themeSelect');
+        themeSelect.addEventListener('change', (e) => {
+            const theme = e.target.value;
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            localStorage.setItem('theme', theme);
+        });
+
+        // Load saved preferences
+        const savedLang = localStorage.getItem('language') || 'hi';
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        languageSelect.value = savedLang;
+        themeSelect.value = savedTheme;
+        if (savedLang !== 'hi') updateLanguage(savedLang);
+        if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+
+        // Submit Question
+        const submitBtn = document.getElementById('submitBtn');
+        const questionInput = document.getElementById('questionInput');
+        const responseArea = document.getElementById('responseArea');
+        const responseText = document.getElementById('responseText');
+        document.getElementById("newQuestionBtn").addEventListener("click", () => {
+    // Stop speaking if ongoing
+    speechSynthesis.cancel();
+
+    // Clear previous response
+    responseText.textContent = "यहाँ आपका जवाब दिखाया जाएगा...";
+
+    // Clear input box
+    questionInput.value = "";
+
+    // Hide response area
+    responseArea.classList.remove('active');
+
+    // Focus cursor back to input
+    questionInput.focus();
+});
+        let controller = null;
+
+document.getElementById("stopBtn").addEventListener("click", () => {
+    speechSynthesis.cancel();
+
+    if (controller) {
+        controller.abort();
+    }
+
+    responseText.textContent = "⛔ Answer stopped. Ask a new question.";
+});
+        submitBtn.addEventListener('click', async () => {
+    const question = questionInput.value.trim();
+
+    if (!question) {
+        alert("कृपया प्रश्न दर्ज करें");
+        return;
+    }
+
+    responseArea.classList.add('active');
+    responseText.textContent = "कृषिMitra जवाब सोच रहा है...";
+
+    try {
+        controller = new AbortController();
+
+const response = await fetch("http://127.0.0.1:8000/ask", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ question }),
+    signal: controller.signal
+});
+
+        const data = await response.json();
+
+        // Show text answer
+        responseText.textContent = data.answer;
+
+        // Speak answer aloud
+        const speech = new SpeechSynthesisUtterance(data.answer);
+        speech.lang = savedLang === 'hi' ? "hi-IN" : "en-IN";
+        speechSynthesis.speak(speech);
+
+    } catch (error) {
+        responseText.textContent = "⚠️ सर्वर से कनेक्शन नहीं हो सका";
+    }
+});
+        
+
+        // Audio Input (Voice Recognition)
+        const audioBtn = document.getElementById('audioBtn');
+        let recognition;
+        let isListening = false;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            // Support multiple languages
+            recognition.lang = savedLang === 'hi' ? 'hi-IN' : 'en-IN';
+
+            recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    questionInput.value = transcript;
+    submitBtn.click(); // automatically send to AI
+            };
+
+            recognition.onerror = () => {
+                isListening = false;
+                audioBtn.innerHTML = savedLang === 'hi' ? '🎤 आवाज़' : '🎤 Voice';
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                audioBtn.innerHTML = savedLang === 'hi' ? '🎤 आवाज़' : '🎤 Voice';
+            };
+        }
+
+        audioBtn.addEventListener('click', () => {
+            if (recognition) {
+                if (!isListening) {
+                    recognition.lang = savedLang === 'hi' ? 'hi-IN' : 'en-IN';
+                    recognition.start();
+                    isListening = true;
+                    audioBtn.innerHTML = savedLang === 'hi' ? '🔴 सुन रहे हैं...' : '🔴 Listening...';
+                } else {
+                    recognition.stop();
+                    isListening = false;
+                    audioBtn.innerHTML = savedLang === 'hi' ? '🎤 आवाज़' : '🎤 Voice';
+                }
+            } else {
+                alert(savedLang === 'hi' ? 
+                    'आपका ब्राउज़र आवाज़ पहचान का समर्थन नहीं करता' : 
+                    'Your browser does not support voice recognition');
+            }
+        });
+
+        // Image Input
+        
+
+        // Logout
+        function handleLogout(e) {
+            e.preventDefault();
+            const confirmMsg = savedLang === 'hi' ? 
+                'क्या आप लॉगआउट करना चाहते हैं?' : 
+                'Do you want to logout?';
+            if (confirm(confirmMsg)) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('mobile');
+                window.location.href = 'index.html';
+            }
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    </script>
+</body>
+</html>
