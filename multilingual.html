@@ -18,6 +18,7 @@
             --text-dark: #333;
             --shadow: rgba(0, 0, 0, 0.1);
         }
+        
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,7 +27,8 @@
             position: relative;
             overflow-x: hidden;
         }
-
+        
+        
         body.dark-mode {
             --bg-light: #1a2f1a;
             --text-dark: #e0e0e0;
@@ -797,21 +799,7 @@
             position: relative;
             border: 4px solid #56ab2f;
             animation: slideUpFade 0.5s ease-out;
-            z-index: 20;
         }
-        .history-area {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 15px 50px rgba(86, 171, 47, 0.4);
-    margin-top: 40px;
-    display: none;
-    border: 4px solid #56ab2f;
-}
-
-.history-area.active {
-    display: block;
-}
 
         @keyframes slideUpFade {
             from {
@@ -1004,82 +992,9 @@
         .hidden {
             display: none;
         }
-        /* ================= ACTION BUTTONS (STOP / NEW) ================= */
-
-.action-btn {
-    margin-top: 20px;
-    padding: 12px 22px;
-    border-radius: 999px; /* pill shape */
-    font-size: 15px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease,
-        background 0.2s ease,
-        opacity 0.2s ease;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Hover */
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-}
-
-/* Click */
-.action-btn:active {
-    transform: scale(0.97);
-}
-
-/* STOP BUTTON (Danger / Control) */
-.stop-btn {
-    background: linear-gradient(135deg, #e53935, #c62828);
-    color: #fff;
-}
-
-.stop-btn:hover {
-    background: linear-gradient(135deg, #d32f2f, #b71c1c);
-}
-
-/* NEW QUESTION BUTTON (Primary / Positive) */
-.new-btn {
-    background: linear-gradient(135deg, #43a047, #7cb342);
-    color: #fff;
-}
-
-.new-btn:hover {
-    background: linear-gradient(135deg, #388e3c, #689f38);
-}
-
-/* Dark mode support */
-body.dark-mode .stop-btn {
-    background: linear-gradient(135deg, #ef5350, #e53935);
-}
-
-body.dark-mode .new-btn {
-    background: linear-gradient(135deg, #66bb6a, #9ccc65);
-}
-
-/* Mobile polish */
-@media (max-width: 768px) {
-    .action-btn {
-        width: 100%;
-        justify-content: center;
-        font-size: 16px;
-    }
-}
-
     </style>
 </head>
 <body>
-
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-brand">
@@ -1091,7 +1006,6 @@ body.dark-mode .new-btn {
             <div class="nav-item" style="cursor: default;">
                 📞 हेल्पलाइन: 1800-180-1551
             </div>
-            <a href="#" class="nav-item" id="historyBtn">📜 इतिहास</a>
             <a href="#" class="nav-item" id="settingsBtn">⚙️ सेटिंग्स</a>
             <a href="#" class="nav-item" id="logoutBtn">🚪 लॉगआउट</a>
         </div>
@@ -1278,19 +1192,9 @@ body.dark-mode .new-btn {
             <div class="response-text" id="responseText">
                 यहाँ आपका जवाब दिखाया जाएगा...
             </div>
-            <button id="stopBtn" class="action-btn stop-btn">
-    ⏹ जवाब रोकें
-</button>
-
-<button id="newQuestionBtn" class="action-btn new-btn">
-    ➕ नया सवाल पूछें
-</button>
-
+            <button id="stopBtn">⏹ जवाब रोकें</button>
+            <button id="newQuestionBtn">➕ नया सवाल पूछें</button>
         </div>
-        <div class="history-area" id="historyArea">
-    <div class="response-header">प्रश्न इतिहास</div>
-    <div class="response-text" id="historyList"></div>
-</div>
     </div>
 
     <!-- Settings Modal -->
@@ -1319,16 +1223,16 @@ body.dark-mode .new-btn {
     </div>
 
     <script>
-        // Check if user is logged in
-        if (!localStorage.getItem('isLoggedIn')) {
-            window.location.href = 'index.html';
-        }
-        /* ===================== MULTILINGUAL SUPPORT ===================== */
+/* ===================== LOGIN CHECK ===================== */
+// 🔧 API BASE (CHANGE ONLY HERE)
+const API_BASE_URL = "http://localhost:8000";
+// const API_BASE_URL = "http://127.0.0.1:8000";
 
-// API base (change only here if needed)
-const API_BASE_URL = "http://127.0.0.1:8000";
+if (!localStorage.getItem('isLoggedIn')) {
+    window.location.href = 'index.html';
+}
 
-// Speech + recognition language map
+/* ===================== LANGUAGE MAPS ===================== */
 const LANG_SPEECH_MAP = {
     hi: "hi-IN",
     mr: "mr-IN",
@@ -1338,329 +1242,155 @@ const LANG_SPEECH_MAP = {
     raj: "hi-IN" // Rajasthani fallback
 };
 
-// Translation helper
+const TRANSLATE_API = "https://translate.googleapis.com/translate_a/single?client=gtx";
+
+/* ===================== TRANSLATION HELPERS ===================== */
 async function translateText(text, from, to) {
-    if (!text || from === to) return text;
-    try {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        return data[0].map(x => x[0]).join("");
-    } catch {
-        return text;
-    }
+    if (from === to) return text;
+
+    const url = `${TRANSLATE_API}&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data[0].map(item => item[0]).join("");
 }
 
-
-        // Language translations
-        const translations = {
-            hi: {
-                home: "🏠 होम",
-                helpline: "📞 हेल्पलाइन: 1800-180-1551",
-                settings: "⚙️ सेटिंग्स",
-                logout: "🚪 लॉगआउट",
-                welcome: "स्वागत है कृषिMitra में!",
-                subtitle: "अपने खेती से जुड़े सवाल पूछें, हम आपकी मदद के लिए यहाँ हैं",
-                inputLabel: "अपना प्रश्न यहाँ दर्ज करें:",
-                placeholder: "उदाहरण: गेहूं की खेती के लिए सबसे अच्छा समय क्या है?",
-                submit: "पूछें",
-                audio: "आवाज़",
-                image: "तस्वीर",
-                settingsTitle: "सेटिंग्स",
-                languageLabel: "भाषा चुनें:",
-                themeLabel: "थीम चुनें:",
-                close: "बंद करें",
-                response: "जवाब:",
-                responseDefault: "यहाँ आपका जवाब दिखाया जाएगा..."
-            },
-            en: {
-                home: "🏠 Home",
-                helpline: "📞 Helpline: 1800-180-1551",
-                settings: "⚙️ Settings",
-                logout: "🚪 Logout",
-                welcome: "Welcome to कृषिMitra!",
-                subtitle: "Ask your farming questions, we're here to help",
-                inputLabel: "Enter your question here:",
-                placeholder: "Example: What is the best time to cultivate wheat?",
-                submit: "Ask",
-                audio: "Voice",
-                image: "Image",
-                settingsTitle: "Settings",
-                languageLabel: "Select Language:",
-                themeLabel: "Select Theme:",
-                close: "Close",
-                response: "Answer:",
-                responseDefault: "Your answer will be displayed here..."
-            }
-        };
-
-        // Settings Modal
-        const settingsBtn = document.getElementById('settingsBtn');
-        const settingsModal = document.getElementById('settingsModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-
-        settingsBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            settingsModal.classList.add('active');
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            settingsModal.classList.remove('active');
-        });
-
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) {
-                settingsModal.classList.remove('active');
-            }
-        });
-
-        // Language Change
-        const languageSelect = document.getElementById('languageSelect');
-        languageSelect.addEventListener('change', (e) => {
-            const lang = e.target.value;
-            updateLanguage(lang);
-            localStorage.setItem('language', lang);
-            currentLang=lang;
-        });
-
-        function updateLanguage(lang) {
-            const t = translations[lang];
-            document.querySelector('.navbar-menu').innerHTML = `
-                <a href="#" class="nav-item">${t.home}</a>
-                <div class="nav-item" style="cursor: default;">${t.helpline}</div>
-                <a href="#" class="nav-item" id="settingsBtn">${t.settings}</a>
-                <a href="#" class="nav-item" id="logoutBtn">${t.logout}</a>
-            `;
-            document.querySelector('.welcome-section h1').textContent = t.welcome;
-            document.querySelector('.welcome-section p').textContent = t.subtitle;
-            document.querySelector('.input-label').textContent = t.inputLabel;
-            document.getElementById('questionInput').placeholder = t.placeholder;
-            document.getElementById('submitText').textContent = t.submit;
-            document.getElementById('audioText').textContent = t.audio;
-            document.querySelector('.image-btn').innerHTML = `📷 ${t.image}`;
-            document.querySelector('.modal-header').textContent = t.settingsTitle;
-            document.querySelector('.setting-item label[for="languageSelect"]').textContent = t.languageLabel;
-            document.querySelector('.setting-item label[for="themeSelect"]').textContent = t.themeLabel;
-            document.getElementById('closeModalBtn').textContent = t.close;
-            document.querySelector('.response-header').textContent = t.response;
-            
-            // Re-attach event listeners
-            document.getElementById('settingsBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                settingsModal.classList.add('active');
-            });
-            
-            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        }
-
-        // Theme Change
-        const themeSelect = document.getElementById('themeSelect');
-        themeSelect.addEventListener('change', (e) => {
-            const theme = e.target.value;
-            if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
-            localStorage.setItem('theme', theme);
-        });
-
-        // Load saved preferences
-        const savedLang = localStorage.getItem('language') || 'hi';
-        let currentLang = savedLang;
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        languageSelect.value = savedLang;
-        themeSelect.value = savedTheme;
-        if (savedLang !== 'hi') updateLanguage(savedLang);
-        if (savedTheme === 'dark') document.body.classList.add('dark-mode');
-
-        // Submit Question
-        const submitBtn = document.getElementById('submitBtn');
-        const questionInput = document.getElementById('questionInput');
-        const responseArea = document.getElementById('responseArea');
-        const responseText = document.getElementById('responseText');
-        document.getElementById("newQuestionBtn").addEventListener("click", () => {
-    // Stop speaking if ongoing
-    speechSynthesis.cancel();
-
-    // Clear previous response
-    responseText.textContent = "यहाँ आपका जवाब दिखाया जाएगा...";
-
-    // Clear input box
-    questionInput.value = "";
-
-    // Hide response area
-    responseArea.classList.remove('active');
-
-    // Focus cursor back to input
-    questionInput.focus();
+/* ===================== SETTINGS & LANGUAGE ===================== */
+const languageSelect = document.getElementById('languageSelect');
+let currentLang = localStorage.getItem('language') || 'hi';
+languageSelect.value = currentLang;
+languageSelect.addEventListener('change', e => {
+    currentLang = e.target.value;
+    localStorage.setItem('language', currentLang);
 });
-        let controller = null;
 
-document.getElementById("stopBtn").addEventListener("click", () => {
-    speechSynthesis.cancel();
+/* ===================== THEME ===================== */
+const themeSelect = document.getElementById('themeSelect');
+const savedTheme = localStorage.getItem('theme') || 'light';
+themeSelect.value = savedTheme;
+if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
-    if (controller) {
-        controller.abort();
-    }
-
-    responseText.textContent = "⛔ Answer stopped. Ask a new question.";
+themeSelect.addEventListener('change', e => {
+    document.body.classList.toggle('dark-mode', e.target.value === 'dark');
+    localStorage.setItem('theme', e.target.value);
 });
-        submitBtn.addEventListener('click', async () => {
-    const question = questionInput.value.trim();
-    const phone = localStorage.getItem("mobile"); 
-    if (!question) {
+
+/* ===================== ELEMENTS ===================== */
+const submitBtn = document.getElementById('submitBtn');
+const questionInput = document.getElementById('questionInput');
+const responseArea = document.getElementById('responseArea');
+const responseText = document.getElementById('responseText');
+const audioBtn = document.getElementById('audioBtn');
+
+/* ===================== TEXT → BACKEND → TEXT ===================== */
+submitBtn.addEventListener('click', async () => {
+    let userQuestion = questionInput.value.trim();
+    if (!userQuestion) {
         alert("कृपया प्रश्न दर्ज करें");
         return;
     }
-    /* ⭐ RESTORE ORIGINAL RESPONSE BEHAVIOR */
-     // Restore original logic
-      historyArea.classList.remove('active');
-      responseArea.classList.add('active');// show with animation
+
+    responseArea.classList.add('active');
     responseText.textContent = "कृषिMitra जवाब सोच रहा है...";
 
-   try {
-    controller = new AbortController();
+    try {
+        // 1. Translate farmer question to Hindi
+        const hindiQuestion = await translateText(userQuestion, currentLang, "hi");
 
-    // 1️⃣ translate farmer input → Hindi
-    const hindiQuestion = await translateText(question, currentLang, "hi");
+        // 2. Send Hindi question to backend
+        const res = await fetch(`${API_BASE_URL}/ask`, {
 
-    // 2️⃣ send Hindi question to backend
-    const response = await fetch(`${API_BASE_URL}/ask`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: hindiQuestion, phone }),
-        signal: controller.signal
-    });
-
-    const data = await response.json();
-
-    // 3️⃣ translate answer back → farmer language
-    const finalAnswer = await translateText(data.answer, "hi", currentLang);
-
-    // 4️⃣ show answer
-    responseText.textContent = finalAnswer;
-
-    // 5️⃣ speak answer
-    const speech = new SpeechSynthesisUtterance(finalAnswer);
-    speech.lang = LANG_SPEECH_MAP[currentLang] || "hi-IN";
-
-    // keep UI behaviour same as before
-    speech.onstart = () => {
-        historyArea.classList.remove("active");
-        responseArea.classList.add("active");
-    };
-
-    speech.onend = () => {
-        responseArea.classList.add("active");
-    };
-
-    speechSynthesis.speak(speech);
-
-} catch (error) {
-    responseText.textContent = "⚠️ सर्वर से कनेक्शन नहीं हो सका";
-}
-
-});
-        
-
-        // Audio Input (Voice Recognition)
-        const audioBtn = document.getElementById('audioBtn');
-        let recognition;
-        let isListening = false;
-
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            
-            // Support multiple languages
-            recognition.lang = LANG_SPEECH_MAP[currentLang] || "hi-IN";
-
-
-            recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    questionInput.value = transcript;
-    submitBtn.click(); // automatically send to AI
-            };
-
-            recognition.onerror = () => {
-                isListening = false;
-                audioBtn.innerHTML = savedLang === 'hi' ? '🎤 आवाज़' : '🎤 Voice';
-            };
-
-            recognition.onend = () => {
-                isListening = false;
-                audioBtn.innerHTML = savedLang === 'hi' ? '🎤 आवाज़' : '🎤 Voice';
-            };
-        }
-
-        audioBtn.addEventListener('click', () => {
-            if (recognition) {
-                if (!isListening) {
-                    recognition.lang = savedLang === 'hi' ? 'hi-IN' : 'en-IN';
-                    recognition.start();
-                    isListening = true;
-                    audioBtn.innerHTML = savedLang === 'hi' ? '🔴 सुन रहे हैं...' : '🔴 Listening...';
-                } else {
-                    recognition.stop();
-                    isListening = false;
-                    audioBtn.innerHTML = savedLang === 'hi' ? '🎤 आवाज़' : '🎤 Voice';
-                }
-            } else {
-                alert(savedLang === 'hi' ? 
-                    'आपका ब्राउज़र आवाज़ पहचान का समर्थन नहीं करता' : 
-                    'Your browser does not support voice recognition');
-            }
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: hindiQuestion })
         });
 
-        // Image Input
-        
-
-        // Logout
-        function handleLogout(e) {
-            e.preventDefault();
-            const confirmMsg = savedLang === 'hi' ? 
-                'क्या आप लॉगआउट करना चाहते हैं?' : 
-                'Do you want to logout?';
-            if (confirm(confirmMsg)) {
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('mobile');
-                window.location.href = 'index.html';
-            }
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        // ---------------- HISTORY FEATURE ----------------
-const historyBtn = document.getElementById("historyBtn");
-const historyArea = document.getElementById("historyArea");
-const historyList = document.getElementById("historyList");
-
-historyBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-
-    const phone = localStorage.getItem("mobile");
-
-    try {
-        const res = await fetch(`http://127.0.0.1:8000/history/${phone}`);
         const data = await res.json();
-        responseArea.classList.remove("active"); 
-        historyArea.classList.add("active");
+        const hindiAnswer = data.answer;
 
-        if (data.history.length === 0) {
-            historyList.innerHTML = "कोई इतिहास उपलब्ध नहीं है";
-            return;
-        }
+        // 3. Translate answer back to farmer language
+        const finalAnswer = await translateText(hindiAnswer, "hi", currentLang);
 
-        historyList.innerHTML = data.history
-            .map(q => `• ${q}`)
-            .join("<br><br>");
+        // 4. Show text
+        responseText.textContent = finalAnswer;
 
-    } catch {
-        historyList.innerHTML = "इतिहास लोड नहीं हो सका";
+        // 5. Speak answer
+        const utter = new SpeechSynthesisUtterance(finalAnswer);
+        utter.lang = LANG_SPEECH_MAP[currentLang] || "hi-IN";
+        speechSynthesis.speak(utter);
+
+    } catch (err) {
+        console.error(err);
+        responseText.textContent = "⚠️ सर्वर से कनेक्शन नहीं हो सका";
     }
 });
-    </script>
+
+/* ===================== VOICE INPUT ===================== */
+let recognition;
+let listening = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = async (e) => {
+        const spokenText = e.results[0][0].transcript;
+        questionInput.value = spokenText;
+        submitBtn.click();
+    };
+
+    recognition.onerror = () => {
+        listening = false;
+        audioBtn.innerHTML = "🎤 आवाज़";
+    };
+
+    recognition.onend = () => {
+        listening = false;
+        audioBtn.innerHTML = "🎤 आवाज़";
+    };
+}
+
+audioBtn.addEventListener('click', () => {
+    if (!recognition) {
+        alert("आपका ब्राउज़र आवाज़ पहचान को सपोर्ट नहीं करता");
+        return;
+    }
+
+    if (!listening) {
+        recognition.lang = LANG_SPEECH_MAP[currentLang] || "hi-IN";
+        recognition.start();
+        listening = true;
+        audioBtn.innerHTML = "🔴 सुन रहे हैं...";
+    } else {
+        recognition.stop();
+        listening = false;
+        audioBtn.innerHTML = "🎤 आवाज़";
+    }
+});
+
+/* ===================== STOP & RESET ===================== */
+document.getElementById("stopBtn").addEventListener("click", () => {
+    speechSynthesis.cancel();
+    responseText.textContent = "⛔ जवाब रोक दिया गया है";
+});
+
+document.getElementById("newQuestionBtn").addEventListener("click", () => {
+    speechSynthesis.cancel();
+    responseArea.classList.remove('active');
+    questionInput.value = "";
+    questionInput.focus();
+});
+
+/* ===================== LOGOUT ===================== */
+document.getElementById('logoutBtn').addEventListener('click', e => {
+    e.preventDefault();
+    if (confirm("क्या आप लॉगआउट करना चाहते हैं?")) {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+});
+</script>
+
 </body>
 </html>

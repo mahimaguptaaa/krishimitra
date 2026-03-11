@@ -5,10 +5,25 @@ import json
 import numpy as np
 import faiss
 import ollama
+import sqlite3
+from datetime import datetime
 from sentence_transformers import SentenceTransformer
 
 app = FastAPI()
+# ---------------- DATABASE SETUP ----------------
+conn = sqlite3.connect("questions.db", check_same_thread=False)
+cursor = conn.cursor()
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    phone TEXT,
+    question TEXT,
+    timestamp TEXT
+)
+""")
+conn.commit()
+# ------------------------------------------------
 # Enable CORS for frontend connection
 app.add_middleware(
     CORSMiddleware,
@@ -29,6 +44,7 @@ texts = [item["text"] for item in data]
 
 class Question(BaseModel):
     question: str
+    phone: str
 
 @app.post("/ask")
 def ask_ai(q: Question):
@@ -60,4 +76,20 @@ Answer in simple Hindi.
         messages=[{"role": "user", "content": prompt}]
     )
 
+        # Save question in DB
+    cursor.execute(
+        "INSERT INTO history (phone, question, timestamp) VALUES (?, ?, ?)",
+        (q.phone, query, datetime.now().isoformat())
+    )
+    conn.commit()
+
     return {"answer": response["message"]["content"]}
+
+@app.get("/history/{phone}")
+def get_history(phone: str):
+    cursor.execute(
+        "SELECT question FROM history WHERE phone=? ORDER BY id DESC",
+        (phone,)
+    )
+    rows = cursor.fetchall()
+    return {"history": [r[0] for r in rows]}

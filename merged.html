@@ -1004,78 +1004,6 @@
         .hidden {
             display: none;
         }
-        /* ================= ACTION BUTTONS (STOP / NEW) ================= */
-
-.action-btn {
-    margin-top: 20px;
-    padding: 12px 22px;
-    border-radius: 999px; /* pill shape */
-    font-size: 15px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease,
-        background 0.2s ease,
-        opacity 0.2s ease;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Hover */
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-}
-
-/* Click */
-.action-btn:active {
-    transform: scale(0.97);
-}
-
-/* STOP BUTTON (Danger / Control) */
-.stop-btn {
-    background: linear-gradient(135deg, #e53935, #c62828);
-    color: #fff;
-}
-
-.stop-btn:hover {
-    background: linear-gradient(135deg, #d32f2f, #b71c1c);
-}
-
-/* NEW QUESTION BUTTON (Primary / Positive) */
-.new-btn {
-    background: linear-gradient(135deg, #43a047, #7cb342);
-    color: #fff;
-}
-
-.new-btn:hover {
-    background: linear-gradient(135deg, #388e3c, #689f38);
-}
-
-/* Dark mode support */
-body.dark-mode .stop-btn {
-    background: linear-gradient(135deg, #ef5350, #e53935);
-}
-
-body.dark-mode .new-btn {
-    background: linear-gradient(135deg, #66bb6a, #9ccc65);
-}
-
-/* Mobile polish */
-@media (max-width: 768px) {
-    .action-btn {
-        width: 100%;
-        justify-content: center;
-        font-size: 16px;
-    }
-}
-
     </style>
 </head>
 <body>
@@ -1278,14 +1206,8 @@ body.dark-mode .new-btn {
             <div class="response-text" id="responseText">
                 यहाँ आपका जवाब दिखाया जाएगा...
             </div>
-            <button id="stopBtn" class="action-btn stop-btn">
-    ⏹ जवाब रोकें
-</button>
-
-<button id="newQuestionBtn" class="action-btn new-btn">
-    ➕ नया सवाल पूछें
-</button>
-
+            <button id="stopBtn">⏹ जवाब रोकें</button>
+            <button id="newQuestionBtn">➕ नया सवाल पूछें</button>
         </div>
         <div class="history-area" id="historyArea">
     <div class="response-header">प्रश्न इतिहास</div>
@@ -1323,34 +1245,6 @@ body.dark-mode .new-btn {
         if (!localStorage.getItem('isLoggedIn')) {
             window.location.href = 'index.html';
         }
-        /* ===================== MULTILINGUAL SUPPORT ===================== */
-
-// API base (change only here if needed)
-const API_BASE_URL = "http://127.0.0.1:8000";
-
-// Speech + recognition language map
-const LANG_SPEECH_MAP = {
-    hi: "hi-IN",
-    mr: "mr-IN",
-    ta: "ta-IN",
-    pa: "pa-IN",
-    as: "as-IN",
-    raj: "hi-IN" // Rajasthani fallback
-};
-
-// Translation helper
-async function translateText(text, from, to) {
-    if (!text || from === to) return text;
-    try {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        return data[0].map(x => x[0]).join("");
-    } catch {
-        return text;
-    }
-}
-
 
         // Language translations
         const translations = {
@@ -1420,7 +1314,6 @@ async function translateText(text, from, to) {
             const lang = e.target.value;
             updateLanguage(lang);
             localStorage.setItem('language', lang);
-            currentLang=lang;
         });
 
         function updateLanguage(lang) {
@@ -1467,7 +1360,6 @@ async function translateText(text, from, to) {
 
         // Load saved preferences
         const savedLang = localStorage.getItem('language') || 'hi';
-        let currentLang = savedLang;
         const savedTheme = localStorage.getItem('theme') || 'light';
         languageSelect.value = savedLang;
         themeSelect.value = savedTheme;
@@ -1519,48 +1411,42 @@ document.getElementById("stopBtn").addEventListener("click", () => {
       responseArea.classList.add('active');// show with animation
     responseText.textContent = "कृषिMitra जवाब सोच रहा है...";
 
-   try {
-    controller = new AbortController();
+    try {
+        controller = new AbortController();
 
-    // 1️⃣ translate farmer input → Hindi
-    const hindiQuestion = await translateText(question, currentLang, "hi");
+const response = await fetch("http://127.0.0.1:8000/ask", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    
+    body: JSON.stringify({ question, phone }),
+    signal: controller.signal
+});
 
-    // 2️⃣ send Hindi question to backend
-    const response = await fetch(`${API_BASE_URL}/ask`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: hindiQuestion, phone }),
-        signal: controller.signal
-    });
+        const data = await response.json();
 
-    const data = await response.json();
+        // Show text answer
+        responseText.textContent = data.answer;
 
-    // 3️⃣ translate answer back → farmer language
-    const finalAnswer = await translateText(data.answer, "hi", currentLang);
+        // Speak answer aloud
+        const speech = new SpeechSynthesisUtterance(data.answer);
+        speech.lang = savedLang === 'hi' ? "hi-IN" : "en-IN";
 
-    // 4️⃣ show answer
-    responseText.textContent = finalAnswer;
-
-    // 5️⃣ speak answer
-    const speech = new SpeechSynthesisUtterance(finalAnswer);
-    speech.lang = LANG_SPEECH_MAP[currentLang] || "hi-IN";
-
-    // keep UI behaviour same as before
-    speech.onstart = () => {
+        /* keep box visible */
+        speech.onstart = () => {
         historyArea.classList.remove("active");
         responseArea.classList.add("active");
-    };
+        
+        };
 
-    speech.onend = () => {
+        speech.onend = () => {
         responseArea.classList.add("active");
-    };
+        };
 
-    speechSynthesis.speak(speech);
+        speechSynthesis.speak(speech);
 
-} catch (error) {
-    responseText.textContent = "⚠️ सर्वर से कनेक्शन नहीं हो सका";
-}
-
+    } catch (error) {
+        responseText.textContent = "⚠️ सर्वर से कनेक्शन नहीं हो सका";
+    }
 });
         
 
@@ -1576,8 +1462,7 @@ document.getElementById("stopBtn").addEventListener("click", () => {
             recognition.interimResults = false;
             
             // Support multiple languages
-            recognition.lang = LANG_SPEECH_MAP[currentLang] || "hi-IN";
-
+            recognition.lang = savedLang === 'hi' ? 'hi-IN' : 'en-IN';
 
             recognition.onresult = (event) => {
     const transcript = event.results[0][0].transcript;
@@ -1661,6 +1546,54 @@ historyBtn.addEventListener("click", async (e) => {
         historyList.innerHTML = "इतिहास लोड नहीं हो सका";
     }
 });
-    </script>
+    
+// ================== MULTILINGUAL MIDDLEWARE (SAFE ADDITION) ==================
+// Configurable API base (change per developer if needed)
+const API_BASE_URL = "http://localhost:8000";
+
+// Lightweight translator (Google public endpoint)
+async function translateText(text, from, to) {
+    if (!text || from === to) return text;
+    try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data[0].map(x => x[0]).join("");
+    } catch (e) {
+        return text; // fail-safe
+    }
+}
+
+// Detect selected language safely
+function getSelectedLang() {
+    const sel = document.getElementById('languageSelect');
+    return sel ? sel.value : 'hi';
+}
+
+// Wrap fetch to /ask only (does not affect history or other calls)
+const _origFetch = window.fetch.bind(window);
+window.fetch = async function(input, init) {
+    try {
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        if (url.endsWith('/ask') && init && init.body) {
+            const payload = JSON.parse(init.body);
+            const userLang = getSelectedLang();
+            const originalQ = payload.question || payload.hindiQuestion || '';
+            const hindiQ = await translateText(originalQ, userLang, 'hi');
+            init.body = JSON.stringify({ question: hindiQ });
+            const res = await _origFetch(`${API_BASE_URL}/ask`, init);
+            const data = await res.clone().json().catch(()=>null);
+            if (data && data.answer) {
+                const finalAns = await translateText(data.answer, 'hi', userLang);
+                return new Response(JSON.stringify({ ...data, answer: finalAns }), { headers: res.headers, status: res.status });
+            }
+            return res;
+        }
+    } catch(e){}
+    return _origFetch(input, init);
+};
+// ================== END MULTILINGUAL MIDDLEWARE ==================
+
+</script>
 </body>
 </html>
