@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+venv/
+.env
+*.pt
+*.pth
+
+# Data
+backend/uploads/
+backend/data/
+backend/ml/weights/
+
+# Node
+node_modules/
+.next/
+.env.local
+
+# Misc
+.DS_Store
+*.log
+
+uploads/
+*.faiss
