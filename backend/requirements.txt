@@ -18,7 +18,7 @@ langchain-community==0.2.5
 pymupdf==1.24.5
 torch==2.12.1
 torchvision==0.27.1
-Pillow==10.3.0
+Pillow==10.4.0
 faster-whisper==1.2.1
 gtts==2.5.1
 pyttsx3==2.90
