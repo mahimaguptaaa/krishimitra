@@ -14,7 +14,7 @@ const LANGUAGES = [
 
 export default function SettingsPanel() {
   const { t } = useTranslation()
-  const { language, theme, setLanguage, setTheme, setSettingsOpen, logout } = useAppStore()
+  const { language, theme, setLanguage, setTheme, logout } = useAppStore()
   const router = useRouter()
   const isDark = theme === 'dark'
   const bg  = isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
@@ -30,7 +30,7 @@ export default function SettingsPanel() {
     <div className={`h-full flex flex-col border-l ${bg} overflow-y-auto`}>
       <div className="p-4 border-b border-inherit flex items-center justify-between">
         <h2 className={`text-lg font-bold ${txt}`}>{t('settings')}</h2>
-        <button onClick={() => setSettingsOpen(false)} className={`${muted} hover:text-red-400 text-xl`}>✕</button>
+        <button onClick={() => router.back()} className={`${muted} hover:text-red-400 text-xl`}>✕</button>
       </div>
 
       <div className="p-4 space-y-6 flex-1">
@@ -68,7 +68,7 @@ export default function SettingsPanel() {
 
         {/* Language selection redirect */}
         <div>
-          <button onClick={() => { setSettingsOpen(false); router.push('/select-language') }}
+          <button onClick={() => { router.push('/select-language') }}
             className={`w-full py-3 rounded-2xl border text-sm font-medium transition-all
               ${isDark ? 'border-gray-700 text-gray-300 hover:bg-gray-800' : 'border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
             🌍 Change Language Screen
