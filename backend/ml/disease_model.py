@@ -1,7 +1,3 @@
-import torch
-import torchvision.transforms as T
-import torchvision.models as models
-from PIL import Image
 import json
 from pathlib import Path
 
@@ -12,6 +8,12 @@ class DiseaseModel:
     NUM_CLASSES = 38
 
     def __init__(self):
+        # Lazy imports - torch only loads when DiseaseModel is first used
+        import torch
+        import torchvision.transforms as T
+        import torchvision.models as models
+        self._torch = torch
+
         self.labels = json.loads(LABELS_PATH.read_text())
         self.model  = self._load_model()
         self.transform = T.Compose([
@@ -21,30 +23,31 @@ class DiseaseModel:
         ])
 
     def _load_model(self):
+        import torchvision.models as models
         if not WEIGHTS_PATH.exists():
             raise FileNotFoundError(
                 f"Model weights not found at {WEIGHTS_PATH}. "
                 "Run: python scripts/download_model.py"
             )
         m = models.efficientnet_b0(weights=None)
-        m.classifier[1] = torch.nn.Linear(1280, self.NUM_CLASSES)
-        m.load_state_dict(torch.load(str(WEIGHTS_PATH), map_location="cpu"))
+        m.classifier[1] = self._torch.nn.Linear(1280, self.NUM_CLASSES)
+        m.load_state_dict(self._torch.load(str(WEIGHTS_PATH), map_location="cpu"))
         m.eval()
         return m
 
     def predict(self, image_path: str) -> dict:
+        from PIL import Image
         img    = Image.open(image_path).convert("RGB")
         tensor = self.transform(img).unsqueeze(0)
-        with torch.no_grad():
-            probs = torch.softmax(self.model(tensor), dim=1)[0]
-        top3_probs, top3_idx = torch.topk(probs, 3)
+        with self._torch.no_grad():
+            probs = self._torch.softmax(self.model(tensor), dim=1)[0]
+        top3_probs, top3_idx = self._torch.topk(probs, 3)
         top_k = [
             {"label": self.labels[i.item()], "confidence": round(p.item(), 4)}
             for p, i in zip(top3_probs, top3_idx)
         ]
-        # ── NEW: reject if model is not confident (likely not a crop image) ──
         top_confidence = top_k[0]["confidence"]
-        if top_confidence < 0.50:   # less than 50% confident = not a crop/plant image
+        if top_confidence < 0.50:
             return {
                 "label": None,
                 "confidence": top_confidence,
