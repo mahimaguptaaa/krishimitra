@@ -10,13 +10,14 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# FIXED: just requirements.txt not backend/requirements.txt
-COPY requirements.txt .
+# Context is repo root, so path is backend/requirements.txt
+COPY backend/requirements.txt .
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy backend source code only
+COPY backend/ .
 
 RUN mkdir -p uploads data ml/weights
 
