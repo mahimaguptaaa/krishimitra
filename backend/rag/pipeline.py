@@ -26,7 +26,7 @@ class RAGPipelineV2:
     def __init__(self):
         # All heavy imports lazy - nothing loads at startup
         self._splitter = None
-        self._embedder = None
+        self._embedder = Embedder()
         self._store    = None
         self.llm       = LLMService()
         self._reranker = None
