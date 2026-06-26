@@ -26,9 +26,9 @@ class RAGPipelineV2:
     def __init__(self):
         # All heavy imports lazy - nothing loads at startup
         self._splitter = None
-        self._embedder = Embedder()
-        self._store    = None
-        self.llm       = LLMService()
+        self._embedder = None
+        self._store = None
+        self.llm = LLMService()
         self._reranker = None
 
     def _get_splitter(self):
@@ -60,55 +60,89 @@ class RAGPipelineV2:
 
     def ingest(self, file_path: str, metadata: dict) -> int:
         from rag.loader import load_document
+
         splitter = self._get_splitter()
         embedder = self._get_embedder()
-        store    = self._get_store()
+        store = self._get_store()
 
-        text   = load_document(file_path)
+        text = load_document(file_path)
         chunks = splitter.split(text, metadata)
-        texts  = [c.page_content for c in chunks]
-        metas  = [{"content": t, "source": metadata.get("filename","?"),
-                   "crop": metadata.get("crop","general"),
-                   "doc_type": metadata.get("doc_type","guide"),
-                   "language": metadata.get("language","en")} for t in texts]
+
+        texts = [c.page_content for c in chunks]
+
+        metas = [
+            {
+                "content": t,
+                "source": metadata.get("filename", "?"),
+                "crop": metadata.get("crop", "general"),
+                "doc_type": metadata.get("doc_type", "guide"),
+                "language": metadata.get("language", "en"),
+            }
+            for t in texts
+        ]
+
         embeddings = embedder.embed(texts)
         store.add(embeddings, metas)
+
         return len(chunks)
 
     async def answer(self, question: str, context: dict = None) -> dict:
         embedder = self._get_embedder()
-        store    = self._get_store()
-        context  = context or {}
+        store = self._get_store()
+        context = context or {}
 
-        q_emb   = embedder.embed_single(question)
+        q_emb = embedder.embed_single(question)
         results = store.search(q_emb, top_k=15)
 
         farmer_crops = context.get("crops", [])
         if farmer_crops:
-            crop_results = [r for r in results if r.get("crop","").lower() in [c.lower() for c in farmer_crops]]
+            crop_results = [
+                r for r in results
+                if r.get("crop", "").lower() in [c.lower() for c in farmer_crops]
+            ]
             results = (crop_results + [r for r in results if r not in crop_results])[:10]
 
         reranker = self._get_reranker()
         if reranker and results:
-            pairs  = [[question, r["content"]] for r in results]
+            pairs = [[question, r["content"]] for r in results]
             scores = reranker.predict(pairs)
-            results = [r for _, r in sorted(zip(scores, results), reverse=True)][:5]
+            results = [
+                r for _, r in sorted(zip(scores, results), reverse=True)
+            ][:5]
         else:
             results = results[:5]
 
         if not results:
-            return {"response": "No relevant documents found. Please upload agricultural PDFs first.", "sources": []}
+            return {
+                "response": "No relevant documents found. Please upload agricultural PDFs first.",
+                "sources": [],
+            }
 
         context_text = "\n---\n".join(
-            f"[Source: {r['source']}]\n{r['content']}" for r in results
+            f"[Source: {r['source']}]\n{r['content']}"
+            for r in results
         )
-        sources = list({r["source"] for r in results})
-        profile = f"Crops: {farmer_crops}, Location: {context.get('state','India')}"
-        answer  = self.llm.complete(RAG_PROMPT.format(
-            context=context_text, question=question, profile=profile
-        ))
 
-        return {"response": answer, "sources": sources}
+        sources = list({r["source"] for r in results})
+
+        profile = (
+            f"Crops: {farmer_crops}, "
+            f"Location: {context.get('state', 'India')}"
+        )
+
+        answer = self.llm.complete(
+            RAG_PROMPT.format(
+                context=context_text,
+                question=question,
+                profile=profile,
+            )
+        )
+
+        return {
+            "response": answer,
+            "sources": sources,
+        }
+
 
 # Backward compatibility
 RAGPipeline = RAGPipelineV2
