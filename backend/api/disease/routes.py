@@ -32,6 +32,7 @@ async def predict_disease(
         shutil.copyfileobj(file.file, f)
 
     # Run disease agent
+    from agents.disease_agent import DiseaseAgent
     agent  = DiseaseAgent()
     result = await agent.run("", {"image_path": str(save_path)})
 
