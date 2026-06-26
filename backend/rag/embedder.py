@@ -1,13 +1,16 @@
-from sentence_transformers import SentenceTransformer
 import numpy as np
 
 class Embedder:
-    def __init__(self):
-        # Downloads automatically on first run (~90MB)
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+    _model = None  # Class-level singleton
+
+    def _get_model(self):
+        if Embedder._model is None:
+            from sentence_transformers import SentenceTransformer
+            Embedder._model = SentenceTransformer("all-MiniLM-L6-v2")
+        return Embedder._model
 
     def embed(self, texts: list) -> np.ndarray:
-        return self.model.encode(texts, show_progress_bar=False).astype("float32")
+        return self._get_model().encode(texts, show_progress_bar=False).astype("float32")
 
     def embed_single(self, text: str) -> np.ndarray:
-        return self.model.encode([text]).astype("float32")[0]
+        return self._get_model().encode([text]).astype("float32")[0]
